@@ -19,6 +19,11 @@ session = DBSession()
 def homepage():
     return render_template('index.html')
 
+# Login Page
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
 @app.route('/result/')
 def result():
     whole = []

@@ -1,16 +1,20 @@
 <html>
 <head
-<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
+<link rel=stylesheet type=text/css href="{{ url_for('static', filename='index.css') }}">
 <link href="https://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap-theme.css" rel="stylesheet">
 <link href="https://cdn.bootcss.com/bootstrap/3.3.0/css/bootstrap.css" rel="stylesheet">
 </head>
 <body>
 <div>
-<!--<a class="btn icon-btn" href="#"><span class="glyphicon btn-glyphicon glyphicon-plus img-circle text-success"></span>-->
-<!--</a>-->
  <p data-placement="top" data-toggle="tooltip" title="Edit">
 	<button class="btn icon-btn" data-title="Edit"  data-toggle="modal" data-target="#edit" >
-	<span class="glyphicon btn-glyphicon glyphicon-plus img-circle text-success"></span>
+	    <span class="glyphicon btn-glyphicon glyphicon-plus img-circle text-success"></span>
+	</button>
+ </p>
+
+ <p data-placement="top" data-toggle="tooltip" title="Edit">
+	<button class="btn icon-btn" data-title="Edit"  data-toggle="modal" data-target="#edit" >
+	    <span class="glyphicon btn-glyphicon glyphicon-plus img-circle text-success"></span>
 	</button>
  </p>
 </div>
@@ -60,7 +64,12 @@
 	            <input class="form-control " type="text" id="a_username" placeholder="Username">
 	        </div>
 		   <div class="form-group">
-	            <input class="form-control " type="text" id="a_password" placeholder="Password">
+                <div class="input-group">
+                    <input type="password" class="form-control pwd" id="a_password">
+                    <span class="input-group-btn">
+                         <button class="form-control btn btn-default reveal" type="button"><i class="glyphicon glyphicon-eye-open"></i></button>
+                    </span>
+                </div>
 	        </div>
            <div class="form-group">
 	            <input class="form-control " type="text" id="a_servergroup" placeholder="ServerGroup">
@@ -79,6 +88,6 @@
 <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
 <!--<script src="https://cdn.bootcss.com/jquery/1.11.1/jquery.js"></script>-->
 <script src="https://cdn.bootcss.com/bootstrap/3.3.0/js/bootstrap.js"></script>
-<script src="{{ url_for('static', filename='style.js')}}"></script>
+<script src="{{ url_for('static', filename='index.js')}}"></script>
 </body>
 </html>
