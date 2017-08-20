@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect, jsonify, url_for
+from flask import Flask, render_template, request, redirect, jsonify, url_for, g
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from database_setup import Base, Host, Passwd
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship, sessionmaker
+from models import Base, Host, Passwd, User
 
 app = Flask(__name__)
 
@@ -11,19 +12,12 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
-
-
-
-# Show the HomePage
+# Home Page
 @app.route('/')
 def homepage():
     return render_template('index.html')
 
-# Login Page
-@app.route('/login')
-def login():
-    return render_template('login.html')
-
+# Result Page
 @app.route('/result/')
 def result():
     whole = []
@@ -43,9 +37,11 @@ def result():
         pass
     return render_template('result.html', search = whole)
 
+
 @app.route('/delete', methods=['POST'])
 def delete():
-    password_id = request.form.get('password_id')  
+    password_id = request.form.get('password_id')
+    print password_id
     PasswordToDelete = session.query(Passwd).filter_by(id=password_id).one()
     session.delete(PasswordToDelete)
     session.commit()

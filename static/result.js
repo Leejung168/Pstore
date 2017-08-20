@@ -3,9 +3,6 @@ function deleteinfo(obj){
     $('#passwd_id').val(passwd_id);
 }
 
-$(".")
-
-
 function editinfo(obj){
     var u_hostid = $(obj).attr("id");
     var u_servername = $(obj).closest('tr').find('td:eq(1)').text();
