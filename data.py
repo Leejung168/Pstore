@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from database_setup import Host, Base, Passwd
+from models import Host, Base, Passwd, User
 
 engine = create_engine('sqlite:///keepass.db')
 # Bind the engine to the metadata of the Base class so that the
@@ -38,4 +38,14 @@ session.commit()
 
 passwd6 = Passwd(username="gpgkey",password="instance", comment="PrivateIP:10.0.0.1", host=server3)
 session.add(passwd6)
+session.commit()
+
+ser1 = User(name="lizheng")
+ser1.hash_password("lizheng")
+session.add(ser1)
+session.commit()
+
+ser1 = User(name="lambert")
+ser1.hash_password("lambert")
+session.add(ser1)
 session.commit()

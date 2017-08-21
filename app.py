@@ -1,24 +1,85 @@
-from flask import Flask, render_template, request, redirect, jsonify, url_for, g
+from flask import Flask, render_template, request, redirect, jsonify, url_for, g, flash,abort, Response
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
+
+from flask_login import LoginManager, login_required, login_user,logout_user, UserMixin
+from flask import session as s
 from models import Base, Host, Passwd, User
+import urllib
 
 app = Flask(__name__)
 
+#Create Database Engine
 engine = create_engine('sqlite:///keepass.db')
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+#Flask-login
+app.secret_key = 'jpe5HrZkLrI2'
+login_manager = LoginManager()
+login_manager.session_protection = 'strong'
+login_manager.login_view = 'login'
+login_manager.init_app(app)
+
+def query_user(username):
+    try:
+        user=session.query(User).filter_by(name=username).one()
+        return user
+    except:
+        return None
+
+@login_manager.unauthorized_handler
+def unauthorized_callback():
+    s['next_url'] = request.url
+    return redirect('/login')
+
+@login_manager.user_loader
+def load_user(userid):
+    users = session.query(User).filter_by(id=userid).one()
+    return users
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        password = request.form.get('password')
+        user = query_user(username)
+        if user is not None and user.verify_password(password):
+            login_user(user)
+            print user.get_id()
+            flash("Logged in successfully.")
+            #next = request.args.get('next')
+            next = s.get('next_url', '/')
+            return redirect(next)
+        else:
+            return abort(401)
+    else:
+        return render_template('login.html')
+
+@app.route('/logout', methods=['GET', 'POST'])
+@login_required
+def logout():
+    logout_user()
+    return render_template('login.html')
+
+# handle login failed
+@app.errorhandler(401)
+def page_not_found(e):
+    return render_template('login.html')
+
+
 # Home Page
 @app.route('/')
+@login_required
 def homepage():
     return render_template('index.html')
 
 # Result Page
 @app.route('/result/')
+@login_required
 def result():
     whole = []
     store={}
@@ -39,6 +100,7 @@ def result():
 
 
 @app.route('/delete', methods=['POST'])
+@login_required
 def delete():
     password_id = request.form.get('password_id')
     print password_id
@@ -49,6 +111,7 @@ def delete():
 
 
 @app.route('/edit', methods=['GET', 'POST'])
+@login_required
 def edit():
     if request.method == "POST":
         u_hostid = request.form.get('u_hostid')
@@ -90,6 +153,7 @@ def edit():
 
 
 @app.route('/add', methods=['GET', 'POST'])
+@login_required
 def add():
     if request.method == "POST":
         try:
