@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect, jsonify, url_for, g, flash,abort, Response
+from flask import Flask, render_template, request, redirect, jsonify, url_for, g, flash,abort
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy import and_
 
 from flask_login import LoginManager, login_required, login_user,logout_user, UserMixin
 from flask import session as s
@@ -11,23 +12,34 @@ import urllib
 app = Flask(__name__)
 
 #Create Database Engine
-engine = create_engine('sqlite:///keepass.db')
+#engine = create_engine('sqlite:///keepass.db')
+engine = create_engine('mysql://root:lambert@127.0.0.1:3306/keepass')
 Base.metadata.bind = engine
 
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
 #Flask-login
-app.secret_key = 'jpe5HrZkLrI2'
+app.secret_key = '*XaDt(sfGd{6Qy+4q|.%0j;Fdm5?n!*~'
 login_manager = LoginManager()
 login_manager.session_protection = 'strong'
 login_manager.login_view = 'login'
 login_manager.init_app(app)
 
+
+#Check the user name if exist in database
 def query_user(username):
     try:
         user=session.query(User).filter_by(name=username).one()
         return user
+    except:
+        return None
+
+#Check the servername if exist in database, the server must be unique.
+def servername_check(server_name):
+    try:
+        server=session.query(Host).filter_by(servername=server_name).one()
+        return server
     except:
         return None
 
@@ -49,7 +61,6 @@ def login():
         user = query_user(username)
         if user is not None and user.verify_password(password):
             login_user(user)
-            print user.get_id()
             flash("Logged in successfully.")
             #next = request.args.get('next')
             next = s.get('next_url', '/')
@@ -83,13 +94,24 @@ def homepage():
 def result():
     whole = []
     store={}
-    search = request.args.get('search')
+    search_keys = request.args.get('search').split()
+    if len(search_keys) > 1:
+        #First search filed;
+        search = search_keys[0]
+        #Second search filed which is search user;
+        search_user = search_keys[1]
+    else:
+        search = search_keys[0]
+        search_user = None
     try:
         search = "%{0}%".format(search)
         result = session.query(Host).filter(Host.servername.like(search)).all()
         if len(result) >= 1:
             for r in result:
-                passwds = session.query(Passwd).filter_by(passwds_id=r.id).all()
+                if search_user is None:
+                    passwds = session.query(Passwd).filter_by(passwds_id=r.id).all()
+                else:
+                    passwds = session.query(Passwd).filter_by(passwds_id=r.id, username=search_user).all()
                 for ps in passwds:
                     store = {"host_id":r.id, "servername":r.servername, "ip":r.ip, "port":r.port, "username":ps.username, "password": ps.password, "passwordid":ps.id, "comment": ps.comment}
                     whole.append(store)
@@ -103,7 +125,6 @@ def result():
 @login_required
 def delete():
     password_id = request.form.get('password_id')
-    print password_id
     PasswordToDelete = session.query(Passwd).filter_by(id=password_id).one()
     session.delete(PasswordToDelete)
     session.commit()
@@ -125,7 +146,6 @@ def edit():
         u_username = request.form.get('u_username').strip()
         u_password = request.form.get('u_password').strip()
         u_comment = request.form.get('u_comment').strip()
-        print "+++" + u_password + "+++"
         try:
             CheckHost = session.query(Host).filter_by(id=hosts_id).one()
             if request.form['u_servername']:
@@ -159,6 +179,8 @@ def add():
         try:
             if request.form['a_servername']:
                 a_servername = request.form.get('a_servername').strip()
+                if servername_check(a_servername) is None:
+                    return jsonify("Repeated server name.")
             if request.form['a_ip']:
                 a_ip = request.form.get('a_ip').strip()
             if request.form['a_port']:
