@@ -179,7 +179,7 @@ def add():
         try:
             if request.form['a_servername']:
                 a_servername = request.form.get('a_servername').strip()
-                if servername_check(a_servername) is None:
+                if servername_check(a_servername) is not None:
                     return jsonify("Repeated server name.")
             if request.form['a_ip']:
                 a_ip = request.form.get('a_ip').strip()
@@ -195,14 +195,12 @@ def add():
                 a_comment = request.form.get('a_comment').strip()
             if request.form['a_servergroup']:
                 a_servergroup = request.form.get('a_servergroup').strip()
-
             server = Host(servername=a_servername, ip=a_ip, port=a_port, group=a_servergroup)
             session.add(server)
             session.commit()
             passwd = Passwd(username=a_username, password=a_password, host=server, comment=a_comment)
             session.add(passwd)
             session.commit()
-            print "Done"
 
         except Exception, e:
             print e
