@@ -6,12 +6,16 @@ from sqlalchemy.orm import relationship, sessionmaker
 from flask_login import LoginManager, login_required, login_user,logout_user, UserMixin
 from flask import session as s
 from models import Base, Host, Passwd, User
-import urllib
+
+from Crypto.Cipher import XOR
+import base64
 
 app = Flask(__name__)
 
+
 #Create Database Engine
 #engine = create_engine('sqlite:///keepass.db')
+secret_key = '*XaDt(sfGd{6Qy+4q|.%0j;Fdm5?n!*~'
 engine = create_engine('mysql://root:lambert@127.0.0.1:3306/keepass')
 Base.metadata.bind = engine
 
@@ -41,6 +45,17 @@ def servername_check(server_name):
         return server
     except:
         return None
+
+#Encrypt/Decrypt Password
+def encrypt(plaintext, key=secret_key):
+  cipher = XOR.new(key)
+  return base64.b64encode(cipher.encrypt(plaintext))
+
+def decrypt(ciphertext, key=secret_key):
+  cipher = XOR.new(key)
+  return cipher.decrypt(base64.b64decode(ciphertext))
+#####################################################################
+##Flask Application
 
 @login_manager.unauthorized_handler
 def unauthorized_callback():
@@ -112,7 +127,7 @@ def result():
                 else:
                     passwds = session.query(Passwd).filter_by(passwds_id=r.id, username=search_user).all()
                 for ps in passwds:
-                    store = {"host_id":r.id, "servername":r.servername, "ip":r.ip, "port":r.port, "username":ps.username, "password": ps.password, "passwordid":ps.id, "comment": ps.comment}
+                    store = {"host_id":r.id, "servername":r.servername, "ip":r.ip, "port":r.port, "username":ps.username, "password": decrypt(ps.password), "passwordid":ps.id, "comment": ps.comment}
                     whole.append(store)
                     store = {}
     except:
@@ -175,7 +190,7 @@ def edit():
             if request.form['u_username']:
                 CheckPass.username = u_username
             if request.form['u_password']:
-                CheckPass.password = u_password
+                CheckPass.password = encrypt(u_password)
             if request.form['u_comment']:
                 CheckPass.comment = u_comment
             session.add(CheckPass)
@@ -203,7 +218,7 @@ def add():
             if request.form['a_username']:
                 a_username = request.form.get('a_username').strip()
             if request.form['a_password']:
-                a_password = request.form.get('a_password').strip()
+                a_password = encrypt(request.form.get('a_password').strip())
             if request.form['a_servername']:
                 a_servername = request.form.get('a_servername').strip()
             if request.form['a_comment']:
