@@ -21,8 +21,10 @@ $("#lambertadd").click(function(){
             "a_servergroup": a_servergroup
         },
         success: function() {
-            console.log("FUCK");
             location.reload();
+        },
+        complete: function(mesg){
+             alert(mesg["responseJSON"]);
         }
     })
 })

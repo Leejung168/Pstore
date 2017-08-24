@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, jsonify, url_for, g
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
-from sqlalchemy import and_
 
 from flask_login import LoginManager, login_required, login_user,logout_user, UserMixin
 from flask import session as s
@@ -124,10 +123,26 @@ def result():
 @app.route('/delete', methods=['POST'])
 @login_required
 def delete():
+    flag = 0
     password_id = request.form.get('password_id')
     PasswordToDelete = session.query(Passwd).filter_by(id=password_id).one()
+    #id equal to paswds_id
+    id = PasswordToDelete.passwds_id
+    #Check if there is only one password entry, if it is, will delete the host.
+    try:
+        session.query(Passwd).filter_by(passwds_id=PasswordToDelete.passwds_id).one()
+        flag = 1
+    except Exception, e:
+        #if not e.args[0].startswith("Multiple"):
+        pass
     session.delete(PasswordToDelete)
     session.commit()
+    
+    if flag == 1:
+        HostTodDelete = session.query(Host).filter_by(id=id).one()
+        session.delete(HostTodDelete)
+        session.commit()
+   
     return jsonify("Okay")
 
 
@@ -166,8 +181,8 @@ def edit():
             session.add(CheckPass)
             session.commit()
         except:
-            return jsonify("Wrong ServerName")
-        return jsonify("Okay")
+            return jsonify("Wrong Server Name.")
+        return jsonify("Update successfully.")
     else:
         return jsonify("Failed")
 
@@ -180,7 +195,7 @@ def add():
             if request.form['a_servername']:
                 a_servername = request.form.get('a_servername').strip()
                 if servername_check(a_servername) is not None:
-                    return jsonify("Repeated server name.")
+                    return jsonify("Failed, Server Name exists in database.")
             if request.form['a_ip']:
                 a_ip = request.form.get('a_ip').strip()
             if request.form['a_port']:
@@ -204,8 +219,8 @@ def add():
 
         except Exception, e:
             print e
-            return jsonify("Failed")
-        return jsonify("Okay")
+            return jsonify("Added failed, make sure you include the right values.")
+        return jsonify("Added successfully")
     else:
         return jsonify("No Way!")
 

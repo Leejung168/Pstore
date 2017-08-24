@@ -79,7 +79,10 @@ $("#lambertupdate").click(function(){
         },
         success: function() {
             location.reload();
-        }
+        },
+        complete: function(mesg){
+            alert(mesg["responseJSON"]);
+       }
     })
   });
 
