@@ -38,3 +38,22 @@ $(".reveal").mousedown(function() {
  .mouseout(function() {
    $(".pwd").replaceWith($('.pwd').clone().attr('type', 'password'));
  });
+
+
+$("#a_ip").focusout(function() {
+     var ip = $("#a_ip").val();
+     var exp=/^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])$/;
+     var reg = ip.match(exp);
+     if(reg==null) {
+         alert("IP Address is unlegal");
+     };
+ })
+
+
+$("#a_port").focusout(function() {
+     var port = $("#a_port").val();
+     var reg = port.match(/^\d+$/);
+     if (reg==null){
+         alert("Not a number!");
+     };
+ })
