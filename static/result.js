@@ -90,8 +90,20 @@ $("#lambertupdate").click(function(){
 });
 
 $(".lambertshow").click(function(){
-    var password = $(this).closest('td').attr('id');
-    $(this).replaceWith(password);
-    console.log(password);
+    var id = $(this).closest('td').attr('class');
+    var button = $(this)
+    $.ajax({
+        url: "/getpw",
+        type: "post",
+        dataType: "json",
+        data: {
+            "id" : id,
+        },
+        complete: function(pw){
+           var pw = pw["responseJSON"];
+           button.replaceWith(pw);
+        }
+
+    })
 }
 )

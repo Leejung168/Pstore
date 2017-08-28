@@ -46,6 +46,7 @@ $("#a_ip").focusout(function() {
      var reg = ip.match(exp);
      if(reg==null) {
          alert("IP Address is unlegal");
+         return true;
      };
  })
 
@@ -55,5 +56,6 @@ $("#a_port").focusout(function() {
      var reg = port.match(/^\d+$/);
      if (reg==null){
          alert("Not a number!");
+         return true;
      };
  })

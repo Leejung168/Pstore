@@ -127,12 +127,28 @@ def result():
                 else:
                     passwds = session.query(Passwd).filter_by(passwds_id=r.id, username=search_user).all()
                 for ps in passwds:
-                    store = {"host_id":r.id, "servername":r.servername, "ip":r.ip, "port":r.port, "username":ps.username, "password": decrypt(ps.password), "passwordid":ps.id, "comment": ps.comment}
+                    store = {"host_id": r.id, "servername": r.servername, "ip": r.ip, "port": r.port,
+                             "username": ps.username, "passwordid": ps.id,
+                             "comment": ps.comment}
+                    # store = {"host_id":r.id, "servername":r.servername, "ip":r.ip, "port":r.port, "username":ps.username, "password": decrypt(ps.password), "passwordid":ps.id, "comment": ps.comment}
                     whole.append(store)
                     store = {}
     except:
         pass
     return render_template('result.html', search = whole)
+
+
+# For safe, get password respectively.
+@app.route('/getpw', methods=['POST'])
+@login_required
+def getpw():
+    if request.method == "POST":
+        try:
+            password_id = request.form.get('id')
+            Password = session.query(Passwd).filter_by(id=password_id).one()
+            return jsonify(decrypt(Password.password))
+        except:
+            return jsonify("*")
 
 
 @app.route('/delete', methods=['POST'])
