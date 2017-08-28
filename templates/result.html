@@ -33,7 +33,12 @@
 			                        <td>{{s.ip}}</td>
 			                        <td>{{s.port}}</td>
 			                        <td>{{s.username}}</td>
-			                        <td>{{s.password}}</td>
+                                    <td id="{{ s.password }}">
+										<button class="btn btn-default lambertshow">
+											<span class="glyphicon glyphicon-eye-open"></span>
+										</button>
+
+                                    </td>
 									<td>{{s.comment}}</td>
 								    <td><p data-placement="top" data-toggle="tooltip" title="Edit">
 											<button class="btn btn-primary btn-xs" data-title="Edit" id = {{ s.host_id|string + ":" + s.passwordid|string }} onclick="editinfo(this)" data-toggle="modal" data-target="#edit" >

@@ -88,3 +88,10 @@ $("#lambertupdate").click(function(){
 
 
 });
+
+$(".lambertshow").click(function(){
+    var password = $(this).closest('td').attr('id');
+    $(this).replaceWith(password);
+    console.log(password);
+}
+)
